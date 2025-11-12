@@ -18,6 +18,7 @@ REGISTRY_PREFIX=""  # Will be set based on cloud provider
 
 echo -e "${BLUE}🚀 Rossmann Sales Forecasting - Cloud Deployment${NC}"
 echo -e "${BLUE}Machine Learning Zoomcamp 2025 - Midterm Project${NC}"
+echo -e "${BLUE}Enhanced with Prophet & ARIMA Time Series Models${NC}"
 echo "=================================================="
 
 # Function to print colored output
@@ -73,9 +74,10 @@ deploy_gcp() {
         --region us-central1 \
         --allow-unauthenticated \
         --port 5000 \
-        --memory 1Gi \
+        --memory 2Gi \
         --cpu 1 \
         --max-instances 10 \
+        --timeout 300 \
         --set-env-vars "FLASK_ENV=production"
     
     # Get service URL
@@ -134,11 +136,12 @@ deploy_aws() {
     docker push $FULL_IMAGE_NAME
     
     print_status "Docker image pushed to ECR!"
-    print_warning "Next steps:"
+    print_warning "Next steps for ECS deployment:"
     echo "  1. Create ECS cluster (if not exists)"
     echo "  2. Create task definition with image: $FULL_IMAGE_NAME"
-    echo "  3. Create ECS service"
-    echo "  4. Configure Application Load Balancer"
+    echo "  3. Set memory to at least 2GB (Prophet models need more memory)"
+    echo "  4. Create ECS service with health checks"
+    echo "  5. Configure Application Load Balancer"
     echo -e "${BLUE}📖 Full instructions: https://docs.aws.amazon.com/ecs/latest/userguide/getting-started-fargate.html${NC}"
 }
 
@@ -198,20 +201,21 @@ case "$1" in
         echo -e "${BLUE}Usage: $0 {gcp|aws|local}${NC}"
         echo ""
         echo -e "${YELLOW}Commands:${NC}"
-        echo "  gcp    - Deploy to Google Cloud Run"
+        echo "  gcp    - Deploy to Google Cloud Run (Recommended for time series)"
         echo "  aws    - Deploy to AWS ECS (ECR push only)"
         echo "  local  - Test deployment locally"
         echo ""
         echo -e "${YELLOW}Examples:${NC}"
         echo "  $0 local    # Test locally with Docker"
-        echo "  $0 gcp      # Deploy to Google Cloud Run"
-        echo "  $0 aws      # Push to AWS ECR"
+        echo "  $0 gcp      # Deploy to Google Cloud Run (2GB memory)"
+        echo "  $0 aws      # Push to AWS ECR (configure 2GB+ memory)"
         echo ""
         echo -e "${YELLOW}Prerequisites:${NC}"
         echo "  • Docker installed and running"
         echo "  • Cloud CLI tools (gcloud/aws) installed"
         echo "  • Authentication configured"
         echo "  • Project/account permissions set up"
+        echo "  • Extra memory for Prophet/ARIMA models (2GB recommended)"
         exit 1
         ;;
 esac

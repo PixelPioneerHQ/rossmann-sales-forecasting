@@ -10,6 +10,11 @@ plotly==5.17.0
 xgboost==2.0.3
 prophet==1.1.5
 
+# Time Series Models
+statsmodels==0.14.1
+pmdarima==2.0.4
+prophet==1.1.5
+
 # Web Framework
 Flask==3.0.0
 gunicorn==21.2.0

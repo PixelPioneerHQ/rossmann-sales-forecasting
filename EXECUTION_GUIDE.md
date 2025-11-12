@@ -43,9 +43,18 @@
 ```bash
 # 1. Setup Kaggle API credentials
 mkdir ~/.kaggle
-# Download kaggle.json from your Kaggle account
+
+# Setting up kaggle.json:
+# Linux/macOS:
+# Place this file in the location ~/.kaggle/kaggle.json
+
 cp kaggle.json ~/.kaggle/
+# For your security, ensure that other users of your computer do not have read access to your credentials. You can do this with the following command:
+
 chmod 600 ~/.kaggle/kaggle.json
+# Windows:
+# Place this file in the location C:\Users\<Windows-username>\.kaggle\kaggle.json
+
 
 # 2. Accept competition rules at:
 # https://www.kaggle.com/c/rossmann-store-sales
@@ -55,17 +64,18 @@ cd rossmann-sales-forecasting
 python data/download_data.py
 ```
 
-### **Phase 2: Model Training (45 minutes)**
+### **Phase 2: Model Training (60 minutes)**
 
 ```bash
-# 1. Install dependencies
+# 1. Install dependencies (including new time series libraries)
 pip install -r requirements.txt
 
-# 2. Train models
+# 2. Train all models (including Prophet and ARIMA)
 cd src
-python train.py
+python train_fixed.py
 
-# Expected output: Best model (likely XGBoost) with ~93% R² score
+# Expected output: Best model (likely Prophet) with ~81% R² score
+# All 5 models: Linear Regression, Random Forest, XGBoost, Prophet, ARIMA
 ```
 
 ### **Phase 3: Local Testing (15 minutes)**
@@ -81,6 +91,8 @@ python tests/test_api.py --quick
 curl -X POST http://localhost:5000/predict \
   -H "Content-Type: application/json" \
   -d '{"Store": 1, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 1}'
+#Or test it with POSTMAN
+Postman TEST.png
 ```
 
 ### **Phase 4: Docker Deployment (20 minutes)**
@@ -177,7 +189,7 @@ This Machine Learning project is **completely implemented** and ready for:
 If you encounter any issues during execution:
 
 1. **Data Download Issues**: Ensure Kaggle API credentials are properly configured
-2. **Model Training Errors**: Check Python version (3.9+) and dependencies
+2. **Model Training Errors**: Check Python version (3.13+) and dependencies
 3. **API Issues**: Verify port 5000 is available
 4. **Docker Problems**: Ensure Docker is running and has sufficient memory
 5. **Cloud Deployment**: Check cloud CLI authentication and permissions

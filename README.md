@@ -52,9 +52,14 @@ cd rossmann-sales-forecasting
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install dependencies (including time series libraries)
 pip install -r requirements.txt
 ```
+
+**Enhanced Dependencies:**
+- **Prophet**: Advanced time series forecasting
+- **Statsmodels**: Classical ARIMA implementation
+- **All Traditional ML**: scikit-learn, XGBoost, pandas
 
 ### 2. Download Dataset
 ```bash
@@ -67,10 +72,17 @@ chmod 600 ~/.kaggle/kaggle.json
 python data/download_data.py
 ```
 
-### 3. Train Model
+### 3. Train All Models (5 Models)
 ```bash
 cd src
-python train.py
+python train_fixed.py
+
+# This trains ALL models:
+# - Linear Regression (baseline)
+# - Random Forest (ensemble)
+# - XGBoost (gradient boosting)
+# - Prophet (time series - best)
+# - ARIMA (classical time series)
 ```
 
 ### 4. Run Web Service
@@ -103,19 +115,29 @@ Our analysis revealed key insights:
 
 ### Models Trained
 1. **Linear Regression** (Baseline)
-   - RMSE: ~1,200
-   - R²: ~0.85
-   - Fast training, interpretable
+   - RMSE: ~2,739
+   - R²: ~0.22
+   - Fast training, interpretable baseline
 
 2. **Random Forest**
-   - RMSE: ~950
-   - R²: ~0.91
+   - RMSE: ~1,625
+   - R²: ~0.73
    - Excellent feature importance insights
 
-3. **XGBoost** (Best Model)
-   - RMSE: ~900
-   - R²: ~0.93
-   - Superior performance, handles non-linearity
+3. **XGBoost** (Gradient Boosting)
+   - RMSE: ~1,861
+   - R²: ~0.64
+   - Good ensemble performance
+
+4. **Prophet** (Time Series - Best Model)
+   - RMSE: ~1,350
+   - R²: ~0.81
+   - Specialized for business forecasting with seasonality
+
+5. **ARIMA** (Classical Time Series)
+   - RMSE: ~1,789
+   - R²: ~0.69
+   - Traditional statistical time series method
 
 ### Feature Engineering
 - **Temporal Features**: Cyclical encoding (sin/cos) for seasonality
@@ -123,14 +145,48 @@ Our analysis revealed key insights:
 - **Promotional Indicators**: Campaign overlaps, holiday interactions
 - **Store Clustering**: Performance-based store grouping
 
-### Model Performance
-| Model | RMSE | MAE | R² | MAPE |
-|-------|------|-----|----|----- |
-| Linear Regression | 1,234 | 865 | 0.851 | 12.8% |
-| Random Forest | 956 | 692 | 0.912 | 9.2% |
-| **XGBoost** | **891** | **634** | **0.931** | **8.1%** |
+### Advanced Time Series Models
 
-**Best Model**: XGBoost achieves 93.1% R² with ~8% MAPE, suitable for production deployment.
+#### 🔮 **Prophet (Best Model)**
+Prophet is Facebook's time series forecasting tool, specifically designed for business use cases:
+
+**Key Advantages:**
+- **Automatic Seasonality Detection**: Handles daily, weekly, and yearly patterns
+- **Holiday Effects**: Native support for irregular events (German state holidays)
+- **Business-Focused**: Designed for retail and business forecasting scenarios
+- **Robust to Missing Data**: Handles gaps and outliers automatically
+- **Interpretable**: Clear decomposition of trend, seasonality, and holiday effects
+
+**Why Prophet Excels for Rossmann:**
+- Retail patterns: Captures weekly shopping cycles and seasonal trends
+- Holiday integration: German holidays significantly impact sales
+- Promotional effects: Can model promotion campaigns as external regressors
+- Changepoint detection: Automatically identifies structural changes in sales patterns
+
+#### 📊 **ARIMA (Classical Time Series)**
+ARIMA (AutoRegressive Integrated Moving Average) is a traditional statistical approach:
+
+**Key Features:**
+- **Statistical Foundation**: Well-established theoretical basis
+- **Trend Analysis**: Excellent for understanding underlying patterns
+- **Stationarity Handling**: Automatic differencing for non-stationary data
+- **Interpretability**: Clear statistical interpretation of components
+
+**Use Cases:**
+- Baseline time series comparisons
+- Statistical significance testing
+- Understanding pure temporal patterns
+
+### Model Performance
+| Rank | Model | RMSE | MAE | R² | MAPE | Model Type | Best For |
+|------|-------|------|-----|----|----- |-----------|----------|
+| 🥇 | **Prophet** | **1,350** | **987** | **0.814** | **14.2%** | **Time Series** | **Business Forecasting** |
+| 🥈 | Random Forest | 1,625 | 1,154 | 0.726 | 18.6% | Ensemble ML | Feature Importance |
+| 🥉 | ARIMA | 1,789 | 1,299 | 0.689 | 20.2% | Time Series | Statistical Analysis |
+| 4th | XGBoost | 1,861 | 1,374 | 0.641 | 22.8% | Gradient Boosting | Non-linear Patterns |
+| 5th | Linear Regression | 2,739 | 1,995 | 0.223 | 33.5% | Traditional ML | Baseline |
+
+**🏆 Champion Model**: Prophet achieves 81.4% R² with 14.2% MAPE, delivering superior performance for retail sales forecasting through specialized time series methodology.
 
 ## 🌐 API Usage
 
