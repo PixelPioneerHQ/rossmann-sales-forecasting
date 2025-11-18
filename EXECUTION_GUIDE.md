@@ -43,18 +43,9 @@
 ```bash
 # 1. Setup Kaggle API credentials
 mkdir ~/.kaggle
-
-# Setting up kaggle.json:
-# Linux/macOS:
-# Place this file in the location ~/.kaggle/kaggle.json
-
+# Download kaggle.json from your Kaggle account
 cp kaggle.json ~/.kaggle/
-# For your security, ensure that other users of your computer do not have read access to your credentials. You can do this with the following command:
-
 chmod 600 ~/.kaggle/kaggle.json
-# Windows:
-# Place this file in the location C:\Users\<Windows-username>\.kaggle\kaggle.json
-
 
 # 2. Accept competition rules at:
 # https://www.kaggle.com/c/rossmann-store-sales
@@ -81,18 +72,29 @@ python train_fixed.py
 ### **Phase 3: Local Testing (15 minutes)**
 
 ```bash
-# 1. Start API service
+# 1. Start FastAPI service
 python src/predict.py
 
-# 2. Test API (in another terminal)
+# 2. Open interactive documentation (in browser)
+# Visit: http://localhost:5000/docs
+# This provides automatic API documentation with live testing!
+
+# 3. Test API endpoints (in another terminal)
 python tests/test_api.py --quick
 
-# 3. Test sample prediction
+# 4. Test model selection
+# Default model (Prophet)
 curl -X POST http://localhost:5000/predict \
   -H "Content-Type: application/json" \
   -d '{"Store": 1, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 1}'
-#Or test it with POSTMAN
-Postman TEST.png
+
+# Specific model selection
+curl -X POST "http://localhost:5000/predict?model=RandomForest" \
+  -H "Content-Type: application/json" \
+  -d '{"Store": 1, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 1}'
+
+# List available models
+curl http://localhost:5000/models
 ```
 
 ### **Phase 4: Docker Deployment (20 minutes)**
@@ -127,10 +129,10 @@ chmod +x deployment/deploy.sh
 |--------------|------------|------------|-------------------|
 | **Problem Description** | 2/2 | ✅ | Clear business context in README |
 | **EDA** | 2/2 | ✅ | Comprehensive analysis in notebook |
-| **Model Training** | 3/3 | ✅ | 3 models with hyperparameter tuning |
-| **Script Export** | 1/1 | ✅ | Clean [`train.py`](src/train.py) script |
+| **Model Training** | 3/3 | ✅ | 5 models with hyperparameter tuning |
+| **Script Export** | 1/1 | ✅ | Clean [`train_fixed.py`](src/train_fixed.py) script |
 | **Reproducibility** | 1/1 | ✅ | Clear instructions + version control |
-| **Model Deployment** | 1/1 | ✅ | Flask API with multiple endpoints |
+| **Model Deployment** | 1/1 | ✅ | FastAPI with model selection + auto docs |
 | **Dependencies** | 2/2 | ✅ | [`requirements.txt`](requirements.txt) + environment docs |
 | **Containerization** | 2/2 | ✅ | Complete [`Dockerfile`](Dockerfile) |
 | **Cloud Deployment** | 2/2 | ⭐ | Scripts ready, bonus points |
@@ -189,7 +191,7 @@ This Machine Learning project is **completely implemented** and ready for:
 If you encounter any issues during execution:
 
 1. **Data Download Issues**: Ensure Kaggle API credentials are properly configured
-2. **Model Training Errors**: Check Python version (3.13+) and dependencies
+2. **Model Training Errors**: Check Python version (3.9+) and dependencies
 3. **API Issues**: Verify port 5000 is available
 4. **Docker Problems**: Ensure Docker is running and has sufficient memory
 5. **Cloud Deployment**: Check cloud CLI authentication and permissions

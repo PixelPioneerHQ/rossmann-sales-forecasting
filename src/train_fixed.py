@@ -40,13 +40,12 @@ np.random.seed(42)
 class RossmannSalesPredictor:
     """Enhanced Rossmann Sales Forecasting with all model types"""
     
-    def __init__(self, data_path="../data", model_path="../models"):
+    def __init__(self, data_path="../data", model_path="../src/models"):
         self.data_path = Path(data_path)
         self.model_path = Path(model_path)
         self.model_path.mkdir(exist_ok=True)
         
-        self.models = {}  # Store all trained models with names
-        self.model_metadata = {}  # Store metadata for each model
+        self.models = {}
         self.best_model = None
         self.best_model_name = None
         self.feature_columns = None
@@ -444,125 +443,50 @@ class RossmannSalesPredictor:
         
         return self.best_model, self.best_model_name, results_df
     
-    def save_individual_model(self, model_name, model, performance_data):
-        """Save individual model and its metadata"""
-        # Clean model name for filename
-        clean_name = model_name.lower().replace(' ', '_').replace('-', '_')
-        
-        # Save model
-        model_file = self.model_path / f'{clean_name}_model.joblib'
-        joblib.dump(model, model_file)
-        
-        # Create and save metadata for this specific model
-        model_metadata = {
-            'model_name': model_name,
-            'model_type': type(model).__name__ if model else 'Unknown',
-            'training_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'performance': performance_data,
-            'features_count': len(self.feature_columns) if self.feature_columns else 0
-        }
-        
-        metadata_file = self.model_path / f'{clean_name}_metadata.joblib'
-        joblib.dump(model_metadata, metadata_file)
-        
-        print(f"✅ {model_name} saved: {model_file.name} & {metadata_file.name}")
-        return model_file, metadata_file
-
     def save_model_artifacts(self):
-        """Save ALL models and related artifacts for deployment"""
-        print("\n💾 Saving ALL model artifacts...")
+        """Save model and related artifacts for deployment"""
+        print("\n💾 Saving model artifacts...")
         
-        if not self.models:
-            print("❌ No models to save!")
+        if not self.best_model:
+            print("❌ No best model to save!")
             return
         
-        # Save all individual models with their metadata
-        print("\n🔄 Saving individual models...")
-        saved_models = {}
-        results_df = pd.DataFrame(self.results)
-        
-        for model_name, model in self.models.items():
-            # Find performance data for this model
-            model_results = None
-            for result in self.results:
-                if result['Model'] == model_name:
-                    model_results = result
-                    break
-            
-            if model_results:
-                model_file, metadata_file = self.save_individual_model(model_name, model, model_results)
-                saved_models[model_name] = {
-                    'model_file': str(model_file),
-                    'metadata_file': str(metadata_file)
-                }
-        
-        # Save the best model as a separate file for backward compatibility
-        if self.best_model:
-            best_model_path = self.model_path / 'best_model.joblib'
-            joblib.dump(self.best_model, best_model_path)
-            print(f"✅ Best model saved: {best_model_path.name}")
-            
-            # CRITICAL FIX: Also save best model under its original name if missing
-            # This ensures Prophet gets saved as prophet_model.joblib even if it's the best
-            if self.best_model_name and self.best_model_name in self.models:
-                clean_name = self.best_model_name.lower().replace(' ', '_').replace('-', '_')
-                individual_model_path = self.model_path / f'{clean_name}_model.joblib'
-                
-                if not individual_model_path.exists():
-                    joblib.dump(self.best_model, individual_model_path)
-                    print(f"🔄 Best model also saved as: {individual_model_path.name}")
-                    
-                    # Also save metadata for the best model under its individual name if missing
-                    individual_metadata_path = self.model_path / f'{clean_name}_metadata.joblib'
-                    if not individual_metadata_path.exists() and hasattr(self, 'results'):
-                        # Find performance data for the best model
-                        for result in self.results:
-                            if result['Model'] == self.best_model_name:
-                                model_metadata = {
-                                    'model_name': self.best_model_name,
-                                    'model_type': type(self.best_model).__name__,
-                                    'training_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                    'performance': result,
-                                    'features_count': len(self.feature_columns) if self.feature_columns else 0
-                                }
-                                joblib.dump(model_metadata, individual_metadata_path)
-                                print(f"📊 Best model metadata saved as: {individual_metadata_path.name}")
-                                break
+        # Save the best model
+        model_path = self.model_path / 'best_model.joblib'
+        joblib.dump(self.best_model, model_path)
+        print(f"✅ Model saved: {model_path}")
         
         # Save feature list
         feature_list_path = self.model_path / 'feature_list.joblib'
         joblib.dump(self.feature_columns, feature_list_path)
-        print(f"✅ Feature list saved: {feature_list_path.name}")
+        print(f"✅ Feature list saved: {feature_list_path}")
         
         # Save store information
         store_df = pd.read_csv(self.data_path / 'store.csv')
         store_info_path = self.model_path / 'store_info.joblib'
         joblib.dump(store_df, store_info_path)
-        print(f"✅ Store info saved: {store_info_path.name}")
+        print(f"✅ Store info saved: {store_info_path}")
         
-        # Save comprehensive model metadata (for best model)
-        if self.best_model and len(results_df) > 0:
-            best_idx = results_df['R²'].idxmax()
-            
-            model_metadata = {
-                'model_name': self.best_model_name,
-                'model_type': type(self.best_model).__name__,
-                'features': self.feature_columns,
-                'performance': results_df.loc[best_idx].to_dict(),
-                'training_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'training_samples': len(self.X_train) if hasattr(self, 'X_train') else 0,
-                'test_samples': len(self.X_test) if hasattr(self, 'X_test') else 0,
-                'all_results': results_df.to_dict('records'),
-                'saved_models': saved_models
-            }
-            
-            metadata_path = self.model_path / 'model_metadata.joblib'
-            joblib.dump(model_metadata, metadata_path)
-            print(f"✅ Model metadata saved: {metadata_path.name}")
+        # Save model metadata
+        results_df = pd.DataFrame(self.results)
+        best_idx = results_df['R²'].idxmax()
         
-        print(f"\n🎉 ALL artifacts saved in: {self.model_path.absolute()}")
-        print(f"📊 Total models saved: {len(saved_models)}")
-        print(f"🏆 Best model: {self.best_model_name}")
+        model_metadata = {
+            'model_name': self.best_model_name,
+            'model_type': type(self.best_model).__name__,
+            'features': self.feature_columns,
+            'performance': results_df.loc[best_idx].to_dict(),
+            'training_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'training_samples': len(self.X_train) if hasattr(self, 'X_train') else 0,
+            'test_samples': len(self.X_test) if hasattr(self, 'X_test') else 0,
+            'all_results': results_df.to_dict('records')
+        }
+        
+        metadata_path = self.model_path / 'model_metadata.joblib'
+        joblib.dump(model_metadata, metadata_path)
+        print(f"✅ Model metadata saved: {metadata_path}")
+        
+        print(f"\n🎉 All artifacts saved in: {self.model_path.absolute()}")
     
     def train_all_models(self):
         """Train all available models"""

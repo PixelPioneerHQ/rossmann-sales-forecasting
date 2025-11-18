@@ -16,8 +16,13 @@ pmdarima==2.0.4
 prophet==1.1.5
 
 # Web Framework
-Flask==3.0.0
+fastapi
+uvicorn==0.24.0
+python-multipart==0.0.6
 gunicorn==21.2.0
+
+# Legacy Flask (if needed for compatibility)
+Flask==3.0.0
 
 # Utilities
 requests==2.31.0

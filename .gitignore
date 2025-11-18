@@ -85,3 +85,7 @@ kaggle.json
 *.pem
 *.key
 credentials.json
+
+# model artifacts
+models/*.joblib
+*.joblib

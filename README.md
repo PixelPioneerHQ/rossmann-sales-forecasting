@@ -5,7 +5,7 @@
 A comprehensive machine learning solution for predicting daily sales of Rossmann drugstore chains to optimize inventory management and business planning.
 
 ![Python](https://img.shields.io/badge/Python-3.9-blue)
-![Flask](https://img.shields.io/badge/Flask-3.0-green)
+![Fastapi](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
@@ -147,7 +147,7 @@ Our analysis revealed key insights:
 
 ### Advanced Time Series Models
 
-#### 🔮 **Prophet (Best Model)**
+#### **Prophet (Best Model)**
 Prophet is Facebook's time series forecasting tool, specifically designed for business use cases:
 
 **Key Advantages:**
@@ -163,7 +163,7 @@ Prophet is Facebook's time series forecasting tool, specifically designed for bu
 - Promotional effects: Can model promotion campaigns as external regressors
 - Changepoint detection: Automatically identifies structural changes in sales patterns
 
-#### 📊 **ARIMA (Classical Time Series)**
+#### **ARIMA (Classical Time Series)**
 ARIMA (AutoRegressive Integrated Moving Average) is a traditional statistical approach:
 
 **Key Features:**
@@ -186,9 +186,10 @@ ARIMA (AutoRegressive Integrated Moving Average) is a traditional statistical ap
 | 4th | XGBoost | 1,861 | 1,374 | 0.641 | 22.8% | Gradient Boosting | Non-linear Patterns |
 | 5th | Linear Regression | 2,739 | 1,995 | 0.223 | 33.5% | Traditional ML | Baseline |
 
-**🏆 Champion Model**: Prophet achieves 81.4% R² with 14.2% MAPE, delivering superior performance for retail sales forecasting through specialized time series methodology.
+## FastAPI Usage
 
-## 🌐 API Usage
+### 📖 Interactive Documentation
+**🎯 Key Feature**: Visit `http://localhost:5000/docs` for automatic interactive API documentation with live testing!
 
 ### Endpoints
 
@@ -197,9 +198,67 @@ ARIMA (AutoRegressive Integrated Moving Average) is a traditional statistical ap
 curl http://localhost:5000/health
 ```
 
-#### Single Prediction
+**Response**:
+```json
+{
+  "status": "healthy",
+  "models_loaded": 5,
+  "default_model": "Prophet",
+  "timestamp": "2025-01-15T10:30:00"
+}
+```
+
+#### Available Models
+```bash
+curl http://localhost:5000/models
+```
+
+**Response**:
+```json
+{
+  "models": ["Prophet", "RandomForest", "XGBoost", "ARIMA", "LinearRegression"],
+  "default_model": "Prophet",
+  "total_models": 5
+}
+```
+
+#### Model Information
+```bash
+# Get info for default (best) model
+curl http://localhost:5000/info
+
+# Get info for specific model
+curl "http://localhost:5000/info?model=Prophet"
+```
+
+#### Single Prediction (Default Model)
 ```bash
 curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Store": 1,
+    "Date": "2015-09-01",
+    "DayOfWeek": 2,
+    "Promo": 1,
+    "SchoolHoliday": 0
+  }'
+```
+
+#### Single Prediction (Specific Model)
+```bash
+# Use Prophet for time series forecasting
+curl -X POST "http://localhost:5000/predict?model=Prophet" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Store": 1,
+    "Date": "2015-09-01",
+    "DayOfWeek": 2,
+    "Promo": 1,
+    "SchoolHoliday": 0
+  }'
+
+# Use Random Forest for feature-based prediction
+curl -X POST "http://localhost:5000/predict?model=RandomForest" \
   -H "Content-Type: application/json" \
   -d '{
     "Store": 1,
@@ -217,28 +276,80 @@ curl -X POST http://localhost:5000/predict \
     "sales": 7542.89,
     "confidence": "high"
   },
-  "input": {...},
+  "input": {
+    "Store": 1,
+    "Date": "2015-09-01",
+    "DayOfWeek": 2,
+    "Promo": 1,
+    "SchoolHoliday": 0
+  },
   "model": {
-    "name": "XGBoost",
-    "version": "1.0.0"
+    "name": "Prophet",
+    "version": "2.0.0",
+    "type": "Prophet"
   },
   "timestamp": "2025-01-15T10:30:00"
 }
 ```
 
-#### Batch Predictions
+#### Batch Predictions with Model Selection
 ```bash
 curl -X POST http://localhost:5000/predict/batch \
   -H "Content-Type: application/json" \
   -d '{
     "predictions": [
-      {"Store": 1, "Date": "2015-09-01", "DayOfWeek": 2},
-      {"Store": 2, "Date": "2015-09-01", "DayOfWeek": 2}
-    ]
+      {"Store": 1, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 1},
+      {"Store": 2, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 0}
+    ],
+    "model": "Prophet"
   }'
 ```
 
-## 🐳 Docker Deployment
+**Response**:
+```json
+{
+  "predictions": [
+    {
+      "index": 0,
+      "input": {"Store": 1, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 1},
+      "prediction": 7542.89,
+      "status": "success"
+    },
+    {
+      "index": 1,
+      "input": {"Store": 2, "Date": "2015-09-01", "DayOfWeek": 2, "Promo": 0},
+      "prediction": 6234.56,
+      "status": "success"
+    }
+  ],
+  "total": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "Prophet",
+  "timestamp": "2025-01-15T10:30:00"
+}
+```
+
+### Model Selection Options
+
+| Model | Use Case | Performance | Speed |
+|-------|----------|-------------|-------|
+| **Prophet** ⭐ | Business forecasting, seasonality | R² 0.814 | Medium |
+| **RandomForest** | Feature importance, interpretability | R² 0.726 | Fast |
+| **XGBoost** | Non-linear patterns, competitions | R² 0.641 | Fast |
+| **ARIMA** | Statistical analysis, time series | R² 0.689 | Medium |
+| **LinearRegression** | Simple baseline, debugging | R² 0.223 | Very Fast |
+
+### FastAPI Features
+
+- **🔍 Automatic Validation**: Pydantic models ensure data quality
+- **📚 Interactive Docs**: Swagger UI at `/docs`, ReDoc at `/redoc`
+- **🎯 Model Selection**: Choose the best model for your use case
+- **⚡ High Performance**: Async support and optimized handling
+- **🛡️ Type Safety**: Full type annotations and validation
+- **📊 Detailed Responses**: Rich error messages and model metadata
+
+## Docker Deployment
 
 ### Build and Run
 ```bash
@@ -300,7 +411,7 @@ rossmann-sales-forecasting/
 └── deployment/                # Cloud deployment configs
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Run Model Training
 ```bash
@@ -337,32 +448,11 @@ pytest tests/
 3. **Strategic Planning**: Store expansion and product assortment decisions
 4. **Risk Management**: Demand volatility and seasonal planning
 
-## 🛠️ Technical Specifications
-
-- **Model Type**: XGBoost Regressor
-- **Features**: 21 engineered features
-- **Training Data**: 814,967 samples
-- **Performance**: 93.1% R², 8.1% MAPE
-- **Latency**: <50ms per prediction
-- **Throughput**: 1000+ predictions/second
-
-## 👥 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🎓 About
 
 This project was developed as part of the **Machine Learning Zoomcamp 2025** course by DataTalks.Club. It demonstrates end-to-end machine learning pipeline development, from data exploration to production deployment.
 
-**Author**: [Your Name]  
+**Author**: PixelPioneer
 **Course**: ML Zoomcamp 2025  
 **Project Type**: Midterm Project  
 
