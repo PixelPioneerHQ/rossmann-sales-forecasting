@@ -372,11 +372,39 @@ docker run -d \
 
 ## ☁️ Cloud Deployment
 
-### Google Cloud Run
+### Docker Desktop
+
 ```bash
-gcloud builds submit --tag gcr.io/[PROJECT-ID]/rossmann-forecasting
-gcloud run deploy --image gcr.io/[PROJECT-ID]/rossmann-forecasting --platform managed
+gcloud auth login
+
+docker push [REGION]-docker.pkg.dev/[YOUR PROJECT ID]/docker/rossmann-forecasting:latest
 ```
+
+### Google Cloud Run (Cloud Shell)
+```bash
+
+gcloud run deploy rossmann-forecasting-service \
+  --image=[REGION]-docker.pkg.dev/[YOUR PROJECT ID]/docker/rossmann-forecasting:latest \
+  --platform=managed \
+  --region=[REGION] \
+  --allow-unauthenticated \
+  --port=5000
+
+```
+![alt text](cloud_run_deployement.png)
+
+![alt text](Predict_post_1.jpg)
+
+![alt text](Predict_result_1.jpg)
+
+![alt text](Bacth_predict_1.jpg)
+
+![alt text](Bacth_predict_2.jpg)
+
+![alt text](Bacth_predict_result_1.jpg)
+
+![alt text](Bacth_predict_result_2.jpg)
+
 
 ## 📁 Project Structure
 
