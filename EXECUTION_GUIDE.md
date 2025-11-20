@@ -129,10 +129,10 @@ chmod +x deployment/deploy.sh
 |--------------|------------|------------|-------------------|
 | **Problem Description** | 2/2 | ✅ | Clear business context in README |
 | **EDA** | 2/2 | ✅ | Comprehensive analysis in notebook |
-| **Model Training** | 3/3 | ✅ | 5 models with hyperparameter tuning |
-| **Script Export** | 1/1 | ✅ | Clean [`train_fixed.py`](src/train_fixed.py) script |
+| **Model Training** | 3/3 | ✅ | 3 models with hyperparameter tuning |
+| **Script Export** | 1/1 | ✅ | Clean [`train.py`](src/train.py) script |
 | **Reproducibility** | 1/1 | ✅ | Clear instructions + version control |
-| **Model Deployment** | 1/1 | ✅ | FastAPI with model selection + auto docs |
+| **Model Deployment** | 1/1 | ✅ | Flask API with multiple endpoints |
 | **Dependencies** | 2/2 | ✅ | [`requirements.txt`](requirements.txt) + environment docs |
 | **Containerization** | 2/2 | ✅ | Complete [`Dockerfile`](Dockerfile) |
 | **Cloud Deployment** | 2/2 | ⭐ | Scripts ready, bonus points |
@@ -191,7 +191,7 @@ This Machine Learning project is **completely implemented** and ready for:
 If you encounter any issues during execution:
 
 1. **Data Download Issues**: Ensure Kaggle API credentials are properly configured
-2. **Model Training Errors**: Check Python version (3.9+) and dependencies
+2. **Model Training Errors**: Check Python version (3.13+) and dependencies
 3. **API Issues**: Verify port 5000 is available
 4. **Docker Problems**: Ensure Docker is running and has sufficient memory
 5. **Cloud Deployment**: Check cloud CLI authentication and permissions

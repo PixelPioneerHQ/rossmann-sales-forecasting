@@ -372,16 +372,6 @@ docker run -d \
 
 ## ☁️ Cloud Deployment
 
-### AWS ECS (Recommended)
-```bash
-# Build and push to ECR
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account>.dkr.ecr.us-east-1.amazonaws.com
-
-docker build -t rossmann-forecasting .
-docker tag rossmann-forecasting:latest <account>.dkr.ecr.us-east-1.amazonaws.com/rossmann-forecasting:latest
-docker push <account>.dkr.ecr.us-east-1.amazonaws.com/rossmann-forecasting:latest
-```
-
 ### Google Cloud Run
 ```bash
 gcloud builds submit --tag gcr.io/[PROJECT-ID]/rossmann-forecasting
